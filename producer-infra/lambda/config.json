@@ -1,0 +1,4 @@
+{
+  "package": "test-kinesis-fn",
+  "region": "ap-southeast-2"
+}

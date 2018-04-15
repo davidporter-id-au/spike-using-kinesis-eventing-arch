@@ -1,0 +1,15 @@
+---
+- name: Deploy stream
+  hosts: localhost
+  connection: local
+  tasks:
+
+    - name: Create consumer stream
+      cloudformation:
+        stack_name: "temp-stream"
+        state: "present"
+        disable_rollback: true
+        template: "CFN-stream.yml"
+        template_parameters:
+          StreamName: "aStream"
+          CrossAccountRole: "arn:aws:iam::99999999999:role/temp-stream-lambda-reader-Role-XXXXXXXX"

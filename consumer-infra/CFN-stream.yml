@@ -1,0 +1,43 @@
+
+Parameters:
+  StreamName:
+    Type: String
+  CrossAccountRole:
+    Type: String
+
+Resources:
+
+  CrossAccountAssumedRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              AWS:
+                !Ref CrossAccountRole
+            Action:
+              - "sts:AssumeRole"
+
+  RolePolicies:
+    Type: "AWS::IAM::Policy"
+    Properties:
+      PolicyName: "cross-account-access"
+      Roles:
+        - !Ref CrossAccountAssumedRole
+      PolicyDocument:
+        Statement:
+          - Effect: Allow
+            Action:
+              - 'kinesis:*'
+            Resource:
+              - !Sub "arn:aws:kinesis:${AWS::Region}:${AWS::AccountId}:stream/${Stream}"
+          - Effect: Allow
+            Action: kinesis:DescribeLimits
+            Resource: "*"
+
+  Stream:
+    Type: 'AWS::Kinesis::Stream'
+    Properties:
+      RetentionPeriodHours: 168
+      ShardCount: 1

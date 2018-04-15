@@ -1,0 +1,21 @@
+
+Parameters:
+  StreamName:
+    Type: String
+
+Resources:
+
+  KinesisStream:
+    Type: 'AWS::Kinesis::Stream'
+    Properties:
+      RetentionPeriodHours: 168
+      ShardCount: 1
+
+Outputs:
+  Stream:
+    Description: The producer stream
+    Value: !Ref KinesisStream
+
+  StreamArn:
+    Description: The producer stream
+    Value: !GetAtt KinesisStream.Arn

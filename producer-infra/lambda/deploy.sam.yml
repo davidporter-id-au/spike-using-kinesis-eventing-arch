@@ -1,0 +1,78 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Parameters:
+  ForwardingStreamName:
+    Type: String
+  StreamArn:
+    Type: String
+  RuntimeRoleArn:
+    Type: String
+  RoleToAssume:
+    Type: String
+
+Resources:
+
+  Role:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "lambda.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Path: "/"
+      Policies:
+        - PolicyName: "root"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                - "logs:*"
+                - "xray:*"
+                Resource: "*"
+              - Effect: "Allow"
+                Action:
+                - "kinesis:*"
+                Resource: !Ref StreamArn
+              - Effect: "Allow"
+                Action: "sts:AssumeRole"
+                Resource: !Ref RoleToAssume
+
+  EventSourceMapping:
+    Type: "AWS::Lambda::EventSourceMapping"
+    DependsOn: LambdaFunction
+    Properties:
+      EventSourceArn:
+        #!Sub "arn:aws:kinesis:${AWS::Region}:${AWS::AccountId}:stream/${KinesisStream}"
+        !Ref StreamArn
+      FunctionName:
+        !GetAtt LambdaFunction.Arn
+      StartingPosition: "TRIM_HORIZON"
+
+  LambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: handler.main
+      Tracing: Active
+      Timeout: 30
+      Runtime: python2.7
+      CodeUri: ./handler.zip
+      Role: !GetAtt Role.Arn
+      Environment:
+        Variables:
+          RoleToAssume: !Ref RoleToAssume
+          ForwardingStreamName: !Ref ForwardingStreamName
+
+Outputs:
+  Fn:
+    Description: The lambda function
+    Value: !Ref LambdaFunction
+  FnArn:
+    Description: The lambda function ARN
+    Value: !GetAtt LambdaFunction.Arn
+

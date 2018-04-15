@@ -1,0 +1,5 @@
+deploy.out.yml
+Gopkg.lock
+*.zip
+vendor
+*.retry

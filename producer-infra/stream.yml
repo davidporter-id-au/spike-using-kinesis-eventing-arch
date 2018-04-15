@@ -1,0 +1,17 @@
+---
+- name: Deploy stream
+  hosts: localhost
+  connection: local
+  tasks:
+
+    - name: Create a stream
+      cloudformation:
+        stack_name: "temp-stream"
+        state: "present"
+        disable_rollback: true
+        template: "CFN-stream.yml"
+        template_parameters:
+          StreamName: "tempstream"
+
+    - name: deploy lambda
+      shell: 'cd lambda && make deploy'
