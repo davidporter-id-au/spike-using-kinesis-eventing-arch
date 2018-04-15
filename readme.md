@@ -58,6 +58,7 @@ This has the following implications:
 - Writing data now cannot result on partial failure, only complete success or
   complete failure (unless one of the workers is down, in which case it is rectifiable and the data should become consistent)
 - Events should be replayable, provided the events have their own id for deduplication (contrast with SQS/SNS here).
+- Application write throughput's upper bound is at most that of the provisioned kinesis shards (this is probably acceptable in my scenario).
 
 #### Cross-account foolishness: 
 
